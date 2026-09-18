@@ -15,7 +15,7 @@ export function SplashScreen({ hiding }: { hiding: boolean }) {
           <img
             src="/images/aquasolo-logo.png"
             alt="Logo Aquasolo"
-            className="h-28 w-28 object-cover bg-white"
+            className="h-28 w-28 object-contain bg-[#0077b6] p-3"
           />
         </div>
         <div className="splash-title flex items-center gap-1.5">

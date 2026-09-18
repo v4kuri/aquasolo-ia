@@ -37,7 +37,7 @@ export function ChatHeader({ isTyping, onReset }: ChatHeaderProps) {
       <img
         src="/images/aquasolo-logo.png"
         alt="Foto de perfil de Aquasolo IA"
-        className="h-10 w-10 rounded-full object-cover bg-white"
+        className="h-10 w-10 rounded-full object-contain bg-[#0077b6] p-1"
       />
 
       <div className="flex min-w-0 flex-1 flex-col">
