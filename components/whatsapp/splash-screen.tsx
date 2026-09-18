@@ -5,7 +5,7 @@ import { VerifiedBadge } from "./verified-badge"
 export function SplashScreen({ hiding }: { hiding: boolean }) {
   return (
     <div
-      className={`absolute inset-0 z-30 flex flex-col items-center justify-between bg-[#0077b6] pb-10 pt-24 transition-all duration-700 ${
+      className={`absolute inset-0 z-30 flex flex-col items-center justify-between bg-[#00a884] pb-10 pt-24 transition-all duration-700 ${
         hiding ? "pointer-events-none -translate-y-4 opacity-0" : "opacity-100"
       }`}
       aria-hidden={hiding}
