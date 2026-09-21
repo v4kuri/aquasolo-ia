@@ -25,18 +25,37 @@ function splitMeta(text: string): {
   }
 }
 
+function pickString(data: unknown): string {
+  if (typeof data === "string") return data
+  if (Array.isArray(data)) return pickString(data[0])
+  if (data && typeof data === "object") {
+    const obj = data as Record<string, unknown>
+    const candidates = [
+      obj.content,
+      obj.output,
+      obj.message,
+      obj.text,
+      obj.reply,
+      obj.body,
+      obj.answer,
+    ]
+    for (const c of candidates) {
+      const s = pickString(c)
+      if (s) return s
+    }
+  }
+  return ""
+}
+
 function parseResponse(raw: string): {
   output: string
   meta: Record<string, unknown> | null
 } {
   let payload: string = raw ?? ""
   try {
-    let data: unknown = JSON.parse(raw)
-    if (Array.isArray(data)) data = data[0] ?? {}
-    const obj = (data ?? {}) as Record<string, unknown>
-    const picked =
-      obj.content ?? obj.output ?? obj.message ?? obj.text ?? obj.reply ?? ""
-    payload = typeof picked === "string" ? picked : JSON.stringify(picked)
+    const data: unknown = JSON.parse(raw)
+    payload = pickString(data)
+    if (!payload) payload = raw
   } catch {
     // texto puro
   }
