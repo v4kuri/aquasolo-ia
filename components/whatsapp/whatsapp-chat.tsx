@@ -232,7 +232,8 @@ export function WhatsAppChat() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            message: text,
+            content: text,
+            type: "text",
             sessionId: sessionIdRef.current,
           }),
           signal: controller.signal,
