@@ -31,9 +31,12 @@ function parseResponse(raw: string): {
 } {
   let payload: string = raw ?? ""
   try {
-    const data = JSON.parse(raw)
-    payload = data?.content ?? data?.output ?? data?.message ?? ""
-    if (typeof payload !== "string") payload = String(payload ?? "")
+    let data: unknown = JSON.parse(raw)
+    if (Array.isArray(data)) data = data[0] ?? {}
+    const obj = (data ?? {}) as Record<string, unknown>
+    const picked =
+      obj.content ?? obj.output ?? obj.message ?? obj.text ?? obj.reply ?? ""
+    payload = typeof picked === "string" ? picked : JSON.stringify(picked)
   } catch {
     // texto puro
   }
