@@ -102,12 +102,27 @@ export async function POST(request: Request) {
 
     const { output, meta } = parseResponse(raw)
     const safeOutput = typeof output === "string" ? output : ""
+    let parsedDebug: unknown = null
+    try {
+      parsedDebug = JSON.parse(raw)
+    } catch {
+      parsedDebug = "not_json"
+    }
     return NextResponse.json({
       output: safeOutput,
       meta: meta ?? null,
       upstream_status: response.status,
       upstream_length: raw.length,
       raw_debug: raw.length <= 8000 ? raw : `${raw.slice(0, 8000)}...(${raw.length - 8000} chars a mais)`,
+      parsed_debug: parsedDebug,
+      picked_debug: (() => {
+        try {
+          return pickString(JSON.parse(raw))
+        } catch {
+          return "parse_failed"
+        }
+      })(),
+      _version: "route.chat.v5-picksplit",
     })
   } catch (err) {
     const detail = err instanceof Error ? err.message : String(err)
