@@ -3,7 +3,7 @@
 // deploy trigger: v4kuri
 import { NextResponse } from "next/server"
 
-export const maxDuration = 800
+export const maxDuration = 300
 export const dynamic = "force-dynamic"
 
 const N8N_WEBHOOK_URL = "https://automacao.v4kuri.com.br/webhook/aquasolo-sdr-ia"
