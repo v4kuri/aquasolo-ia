@@ -1,5 +1,6 @@
 // Proxy do chat AQUASOLO: encaminha texto ao webhook n8n aquasolo-sdr-ia
 // e devolve pra UI o texto puro que o Rafa gerou.
+// deploy trigger: v4kuri
 import { NextResponse } from "next/server"
 
 export const maxDuration = 800
