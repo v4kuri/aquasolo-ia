@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 
-const N8N_WEBHOOK_URL = "https://automacao.v4kuri.com.br/webhook/aqua-sdr-ia"
+const N8N_WEBHOOK_URL = "https://automacao.v4kuri.com.br/webhook/aquasolo-sdr-ia"
 const N8N_TIMEOUT_MS = 300000
 
 const META_MARKER = "<<<META>>>"
