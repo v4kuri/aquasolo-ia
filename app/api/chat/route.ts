@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server"
 
+export const maxDuration = 800
+export const dynamic = "force-dynamic"
+
 const N8N_WEBHOOK_URL = "https://automacao.v4kuri.com.br/webhook/aquasolo-sdr-ia"
-const N8N_TIMEOUT_MS = 300000
 
 const META_MARKER = "<<<META>>>"
 
@@ -24,10 +26,11 @@ function parseResponse(raw: string): {
   output: string
   meta: Record<string, unknown> | null
 } {
-  let payload = raw
+  let payload: string = raw ?? ""
   try {
     const data = JSON.parse(raw)
-    payload = data.content ?? data.output ?? data.message ?? ""
+    payload = data?.content ?? data?.output ?? data?.message ?? ""
+    if (typeof payload !== "string") payload = String(payload ?? "")
   } catch {
     // texto puro
   }
@@ -35,9 +38,6 @@ function parseResponse(raw: string): {
 }
 
 export async function POST(request: Request) {
-  const controller = new AbortController()
-  const timeout = setTimeout(() => controller.abort(), N8N_TIMEOUT_MS)
-
   try {
     const body = await request.json()
     const content: string | undefined = body?.message ?? body?.content
@@ -45,7 +45,6 @@ export async function POST(request: Request) {
     const sessionId: string = body?.sessionId || crypto.randomUUID()
 
     if (!content || typeof content !== "string") {
-      clearTimeout(timeout)
       return NextResponse.json({ error: "Mensagem inválida" }, { status: 400 })
     }
 
@@ -54,13 +53,13 @@ export async function POST(request: Request) {
     url.searchParams.set("type", type)
     url.searchParams.set("sessionId", sessionId)
 
+    // Sem timeout: espera o n8n responder o quanto for necessário.
+    // A plataforma (Vercel) tem seu próprio limite de execução via maxDuration.
     const response = await fetch(url.toString(), {
       method: "GET",
       headers: { Accept: "application/json" },
-      signal: controller.signal,
+      cache: "no-store",
     })
-
-    clearTimeout(timeout)
 
     const raw = await response.text()
 
@@ -77,19 +76,12 @@ export async function POST(request: Request) {
     }
 
     const { output, meta } = parseResponse(raw)
-    return NextResponse.json({ output, meta })
+    return NextResponse.json({ output, meta, raw_debug: raw.length > 8000 ? undefined : raw })
   } catch (err) {
-    clearTimeout(timeout)
-    const aborted = err instanceof DOMException && err.name === "AbortError"
     const detail = err instanceof Error ? err.message : String(err)
     return NextResponse.json(
-      {
-        error: aborted
-          ? "Tempo esgotado ao consultar o assistente"
-          : "Erro ao comunicar com o chatbot",
-        detail,
-      },
-      { status: aborted ? 504 : 500 }
+      { error: "Erro ao comunicar com o chatbot", detail },
+      { status: 500 }
     )
   }
 }

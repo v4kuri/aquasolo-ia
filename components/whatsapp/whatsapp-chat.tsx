@@ -23,7 +23,6 @@ const SESSION_KEY = "aquasolo-ia:session:v2"
 const TYPING_MIN_MS = 700
 const TYPING_MS_PER_CHAR = 18
 const TYPING_MAX_MS = 3200
-const REQUEST_TIMEOUT_MS = 300000
 
 function nowTime() {
   return new Date().toLocaleTimeString("pt-BR", {
@@ -224,9 +223,6 @@ export function WhatsAppChat() {
         )
       }, 1200)
 
-      const controller = new AbortController()
-      const timeoutId = scheduleTimer(() => controller.abort(), REQUEST_TIMEOUT_MS)
-
       try {
         const res = await fetch("/api/chat", {
           method: "POST",
@@ -236,10 +232,7 @@ export function WhatsAppChat() {
             type: "text",
             sessionId: sessionIdRef.current,
           }),
-          signal: controller.signal,
         })
-        clearTimeout(timeoutId)
-        timersRef.current.delete(timeoutId)
 
         if (!res.ok) throw new Error(`http ${res.status}`)
 
@@ -249,15 +242,12 @@ export function WhatsAppChat() {
           "Desculpe, não consegui processar sua mensagem. Tente novamente."
 
         appendReplies(raw, nowTime())
-      } catch (err) {
-        const aborted = err instanceof DOMException && err.name === "AbortError"
+      } catch {
         setMessages((prev) => [
           ...prev,
           {
             id: newId(),
-            text: aborted
-              ? "A resposta demorou demais. Tenta de novo em instantes."
-              : "Erro de conexão. Verifique sua internet e tente novamente.",
+            text: "Erro de conexão. Verifique sua internet e tente novamente.",
             sender: "them",
             time: nowTime(),
           },
